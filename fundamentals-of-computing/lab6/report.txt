@@ -1,0 +1,50 @@
+Walker Bagley
+CSE 20311 Lab 6
+report.txt
+
+My life program is divided into three files: playlife.c, lifefunc.c and lifefunc.h. playlife.c contains the main code for the program, consisting of getting user input and running the entire game. This file begins by reading the number of arguments passed in the command line and setting a file pointer to the file passed if present. It will throw an error for too many arguments. Then, the program initializes two 2D arrays of chars, one representing the current state of the game board and one representing the future state. I then set up an infinite while loop that takes either user input from the keyboard or reads from the file depending on the presence of the file pointer. The program reads line by line for each command, with the first letter being the option chosen by the user. So, the first char becomes the choice entered in a switch with various cases for the game to take as outlined below:
+
+a: add a cell
+r: remove a cell
+n: next iteration of the game
+p: play game continuously
+q: quit
+
+If the switch selects 'a' or 'r', the program reads in the next two integers from the line to indicate the indices of the cell to add or remove. For each case, the appropriate function is called from the lifefunc.c file. Each function updates the future board and then calls the updateBoard function to save the future board values in the actual game board. Then the console is cleared and the new board is printed to the console. The continuous play option works by delaying the next iteration by 0.2 seconds, in order to see how the cells progress, while running the code from case 'n' repetitively.
+
+lifefunc.c contains the code for all of the functions enumerated in lifefunc.h, and a list of them with explanations can be found below.
+
+void printBoard(char[SIZE][SIZE]);
+This function takes the board as an input and iterates through it, printing each value in a grid bound on the outside with a box. It uses a simple double for loop to iterate through each dimension and includes 2 extra iterations in order to account for the outline.
+
+void addCell(char[SIZE][SIZE], int, int);
+This function simply sets the location specified by the two integers passed in on the board array argument to 'x'.
+
+void removeCell(char[SIZE][SIZE], int, int);
+This function simply sets the location specified by the two integers passed in on the board array argument to ' '.
+
+void nextIteration(char[SIZE][SIZE], char[SIZE][SIZE]);
+This function updates the second board passed to it to the next iteration of the game according to the rules from the first board passed in. This function works by iterating through both dimensions of the first board, and calling the helper function numNeighbors function on each cell to determine it's number of neighbors. The function then sets the same indices on the second board to 'x' if the cell has exactly three neighbors or if the cell is already 'x' and has exactly two or three neighbors. Otherwise, the indices are set to ' ' on the second board.
+
+void updateBoard(char[SIZE][SIZE], char[SIZE][SIZE]);
+This function very simply iterates through each dimension of the board and sets each index of the second argument array to the same value as the first one.
+
+int numNeighbors(char[SIZE][SIZE], int, int);
+This function is fun because it determines the number of neighbors a given index on the board has and is used for each element of the board in the nextIteration function. This function works by iterating through the 3x3 area with the specified index at the center, and counting how many of those cells are equal to 'x'. The function automatically sets the min and max for iteration to the edge if the specified index is on any of the edges, in order to avoid an index out of bounds error. Further, if the given cell is an 'x', then the counter begins at -1 in order to avoid counting itself as a neighbor.
+
+That is a jist of how the program works, but now let's examine the five scenes for this lab.
+
+scene1.txt
+This scene consists of four still life forms in the Game of Life. I found the top three on my own in experimenting and testing the program, and the bottom one I found intereesting on Wikipedia.
+
+scene2.txt
+This scene consists of four different oscillators that cycle through phases between returning to their initial state. They are patterns such that without interference from other cells will operate infinitely through their respective loops. I found all but the top right "+"/"o" oscillator on Wikipedia.
+
+scene3.txt
+This scene contains four versions of a glider, two moving towards the bottom right and two towards the top left. None of them interfere with each other so they all eventually reach the edge and become static squares of cells.
+
+scene4.txt
+This scene begins with a square of cells with a hole in the middle, a sort of donut if you will. It "explodes" into a symetrical expanding pattern that ebbs and flows for a while before becoming a symmetrical pattern of static clumps and line oscillators.
+
+scene5.txt
+I created this scene by randomly adding cells until something cool happened. This scene just has groups of cells running around for a while in various formations and shoots off a couple gliders before becoming completely static.

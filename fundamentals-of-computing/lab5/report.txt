@@ -1,0 +1,18 @@
+Walker Bagley
+CSE 20311 Lab 5
+20 February 2022
+
+The mysayings.c program is probably the most complex C program I have written for this class. Internally, it takes a text input for a file name from the user and checks if that file exists in the current directory. If said file does exist, then the program opens the file and reads each line of the file into a 2d char array, or a string array. Each line of the file represents a saying, so storing each line as a new entry in the sayings array keeps them all separate. Next, the program enters a while loop, calling a printMenu function and prompting the user for a choice before entering a switch statement with various cases. Each case calls the appropriate function for the process chosen by the user, which are outlined below.
+
+1 - Display all sayings currently in database
+2 - Enter a new saying into the database
+3 - List sayings that contain a specific word
+4 - Print number of sayings in database
+5 - Find the longest saying in the database
+6 - Find the shortest saying in the database
+7 - Save all sayings in a new text file
+8 - Quit the program
+
+First, option 1 iterates through the array of sayings and prints each one on a new line with a for loop. Option 2 prompts the user for a saying, and then appends it to the array of sayings after the last saying, using the number of sayings as a parameter in order to know where in the array to place the new saying. Option 3 prompts the user for a word, and then iterates through the array of sayings and prints them if they contain said word by checking with the strstr function from the string library. Option 4 simply prints the number of sayings currently in the database by using the count variable. Option 5 finds the longest saying by initializing a blank string and setting a length equal to 0 before iterating through the array of sayings and updating the string and length variables if a string is longer than the current one. This function makes use of the strlen function from the string library. Option 6 is more or less the same programmatically as option 5, simply starting with a longer length and updating it if a saying is shorter. Option 7 prompts the user for a file name, and then creates/opens that file using the "w" argument. This function then iterates through the array of sayings and writes each one to a new line in the file. Option 8 quits the program by exiting the while loop.
+
+I verified the output of this program by running each option many times with various inputs as well as implementing intermediate print statements to see how variables were stored before finalizing the program.

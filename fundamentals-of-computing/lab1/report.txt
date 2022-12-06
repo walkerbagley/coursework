@@ -1,0 +1,4 @@
+Walker Bagley
+23 January 2022
+
+From the user's perspective, my program is meant to calculate the third side length for any triangle according to the Law of Cosines. It first collects three values for the two side lengths and the angle between them, and then prints the third side length after using the math library to compute the calculation. I evaluated the program by comparing the values this returned with a Law of Cosines calculator on Google in addition to testing with simple pythagorean triples. In all cases the program is correct, however one flaw is that it doesn't do data validation for side length or angle.

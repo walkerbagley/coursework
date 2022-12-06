@@ -1,0 +1,4 @@
+Walker Bagley
+24 January 2022
+
+From the user's perspective, the graph program does not require any input, but rather prints out the graph of y = cos(x^2/5) - sin(x/2) + 2 from x = 0 to x = 10. The user can read a table of x and y values to the left of a visual representation of the function with "#". The program works by incrementing along the x axis by 0.2 from 0 to 10 and generating the functional y value at each point. The value is then tested for minimum and maximum before being printed using a for loop from 0 to the y value. I verified the accuracy of my plot by comparing it to the Desmos graphing calculator visual aid.

@@ -1,0 +1,34 @@
+Walker Bagley
+CSE 20311 Lab 7
+report.txt
+
+My states program is divided into three files: usastates.c, statefunc.c and statefunc.h. statefunc.h contains the struct definition for State, as well as the function headers. usastates.c contains the main code for the program, consisting of getting user input and running the entire game. This file begins by reading the number of arguments passed in the command line and setting a file pointer to the file passed if present. It will throw an error for too many arguments. Then, the program initializes an array of States, and reads in each line of the provided csv to a State. I then set up an infinite while loop that takes user input from the keyboard with regards to the provided menu. Based on the choice entered, a switch executes with various cases for the game to take as outlined below.
+
+1 - Show all data
+2 - Show state data based on abbreviation
+3 - Show capital based on name
+4 - Show states that joined in n year
+5 - Show states who joined between 2 years
+6 - Show states in order of joining
+7 - Show bar graph of years joined
+8 - Quit
+
+Depending on the option, the program calls appropriate functions from the function files. Each case gathers user input if necessary, then uses the printData function with the exception of option 3. Each function is explained below.
+
+void printMenu();
+Function that prints the menu.
+
+void printData(State[], int);
+This function takes a State array and the number of states to print as inputs, and loops through the array, printing each state on its own line in a table.
+
+int locateState(State[], int, char[]);
+This function iterates through the input array of States, and checks the name and abbreviation of each, comparing it to the provided string. It then returns the index of the state in the array if it is found, or -1 if it is not found.
+
+int stateYears(State[], State[], int, int, int);
+This function takes two arrays, and checks if the year of each State in the first one is between the two years provided (inclusive). If it is contained between the years, then it is added to the second array. The number of arrays that fall between the years is returned as an integer.
+
+void orderStates(State[], State[], int);
+This function takes the States in the first array and orders them by year in the second array. It works by iterating through each State in the first array, and "inserting" it into it's proper place in the second array being filled up.
+
+void printBar(State[], int, int);
+This function takes the number of bins specified, and counts the number of States with years in each bin between the min and max years of the State array. It then prints a graph of each count along with the years for each bin.

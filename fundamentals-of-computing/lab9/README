@@ -1,0 +1,12 @@
+Walker Bagley
+CSE 20311 Lab 9
+README
+
+For my funanim.c file, the user input is as follows:
+
+- Right arrow key: increase polygon radius
+- Left arrow key: decrease polygon radius
+- Up arrow key: increase polygon speed
+- Down arrow key: decrease polygon speed
+- 3-9 number keys: change polygon to n sides
+- Left click: change polygon to random color
