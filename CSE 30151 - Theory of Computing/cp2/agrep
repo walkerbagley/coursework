@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+# Walker Bagley and Patrick Schlosser
+# CSE 30151: Theory of Computing CP2
+# 10 March 2023
+
+import sys
+import re_to_nfa as re
+import nfa
+
+if __name__=='__main__':
+    # couldn't get this any lower
+    sys.setrecursionlimit(2250)
+
+    n = re.re_to_nfa(sys.argv[1])
+    strings = []
+    for line in sys.stdin:
+        if nfa.match_dfs(n, line.strip())[0]:
+            print(line)

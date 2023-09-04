@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+# Walker Bagley and Patrick Schlosser
+# CSE 30151: Theory of Computing CP4
+# 21 April 2023
+
+import sys
+
+def cnf_to_re(formula):
+    clauses = formula.split('&') # each term will be seperated by &
+    v = {} # dict to number each reference term; note that first term may not be x1
+    iter = 1
+    regex = ''
+    for clause in clauses:
+        c = [] # list to hold regex formatted references in order
+        for term in clause[1:-1].split('|'): # removes parens
+            term = [term] # eg !x1 -> [!x1]
+            if term[0][0] == '!':
+                term[0] = term[0][1:] # [!x1] -> [x1]
+                term.append('x') # [x1] -> [x1x]
+            if term[0] not in v:
+                v[term[0]] = str(iter) # number each of our references
+                iter += 1
+            term[0] = v[term[0]] # [x1x] -> '1'
+            c.append(f'\\{"".join(term)}')
+        regex += '(' + '|'.join(c) + '),'
+    regex = '(x*)'*len(v) + 'x*' + ';' + regex
+    s = 'x'*len(v) + ';' + 'x,'*len(clauses)
+    return regex, s
+
+if __name__=='__main__':
+    if (len(sys.argv) != 2):
+        print('Please input a SAT expression')
+        exit(0)
+
+    formula = sys.argv[1]
+    re, s = cnf_to_re(formula)
+    print(f'regexp:{re}')
+    print(f'string:{s}')

@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+
+# Walker Bagley and Patrick Schlosser
+# CSE 30151: Theory of Computing CP1
+# 9 February 2023
+
+from collections import defaultdict
+import sys
+
+class NFA:
+    # define NFA data structure
+    Q = None
+    E = None
+    s = None
+    F = None
+    graph = defaultdict(lambda: defaultdict(list))
+        
+    # initialize an NFA from file
+    def __init__(self, fname) -> None:
+        '''
+        fname: the name of a file
+        '''
+        with open(fname,'r') as fp:
+            self.Q = fp.readline().split()
+            self.E = fp.readline().split()
+            self.s = fp.readline().strip()
+            self.F = fp.readline().split()
+            data = fp.readlines()
+        for line in data:
+            source, symbol, target = line.split()
+            self.graph[source][target].append(symbol)
+    
+    # to string solely used for testing purposes
+    def __str__(self) -> str:
+        string = '----------------------\n'
+        string += f"Q = {self.Q}\nE = {self.E}\ns = {self.s}\nF = {self.F}\n"
+        string += '--------delta--------\n'
+        for source,target in self.graph.items():
+            for t, symbol in target.items():
+                string += f'{source} > {symbol} > {t}\n'
+        string += '----------------------\n'
+        return string
+    
+    # write the NFA to a new file, also mainly for testing purposes
+    def write_nfa(self, fname):
+        '''
+        fname: the name of a file
+        '''
+        with open(fname, 'w') as fp:
+            fp.write(' '.join(self.Q)+'\n')
+            fp.write(' '.join(self.E)+'\n')
+            fp.write(self.s+'\n')
+            fp.write(' '.join(self.F)+'\n')
+
+# match function as outlined by question 2
+def match(nfa, string):
+    '''
+    • takes an NFA to run and the string to run on
+    • returns: A pair (flag, path)
+    '''
+
+    # immediate cases for an empty string
+    if not string:
+        # if the starting state is an accept state
+        if nfa.s in nfa.F:
+            return (True, [])
+        # if there are no paths for the empty string to take
+        elif ["&"] not in nfa.graph[nfa.s].values():
+            return (False, [])
+
+    # frontier contains starting node, remaining string and the path the string has taken thus far
+    frontier  = [(nfa.s, string, "")]
+    
+    # visited only used to keep track of transitions that have been made already as tuples: (node1, character, node2, string at that point), used to avoid infinite loops
+    visited   = set()
+
+    # any path upon finish is appended to solutions
+    solutions = []
+
+    # enter the DFS
+    while frontier:
+        # deconstruct the last element of the frontier
+        state, word, trail = frontier.pop()
+
+        # iterate through possible transitions that can be taken
+        for neighbor, paths in nfa.graph[state].items():
+            for path in paths:
+
+                # check for infinite loop so we don't add to our frontier
+                if (state, path, neighbor, word) in visited:
+                    continue
+                
+                # take a transition that is not the empty string
+                if word and word[0] == path:
+                    frontier.append((neighbor, word[1:], trail + state + "." + path + "." + neighbor + ","))
+                    visited.add((state, path, neighbor, word[1:]))
+                
+                # take an empty string transition
+                elif path == "&":
+                    frontier.append((neighbor, word, trail + state + "." + path + "." + neighbor + ","))
+                    visited.add((state, path, neighbor, word))
+
+        # alternative method if we want solutions to be a set, requires some list comprehension on solutions shown below
+        # if not word and trail:
+        #     solutions.add(trail)
+
+        # check if we reach the end of the string and add it to solutions if necessary
+        if not word and trail:
+            trail = trail.split(",")
+            if trail[-2].split(".")[-1] in nfa.F:
+                solutions.append([i.split(".") for i in trail[:-1]])
+
+    # other part of alternative method, requires returning solutions[0] instead of solutions.pop()
+    # solutions = [[j.split(".") for j in i.split(",")] for i in solutions]
+    # solutions = [i[:-1] for i in solutions if i[-2][-1] in nfa.F]
+
+    # return our boolean accept/reject followed by accepting path or empty list
+    return (True if solutions else False, solutions.pop() if solutions else [])
+    
+
+if __name__=='__main__':
+    # Testing code for various cases in the test
+
+    # n = NFA('../examples/sipser-n1.nfa')
+    # print(str(n))
+    # m = match(n, "010110")
+    # print(m)
+
+    # Reads in each NFA, matches the string and outputs appropriate accept/reject info, more or less question 3 of the assignment
+
+    n = NFA(sys.argv[1])
+    m = match(n, sys.argv[2])
+    print("accept" if m[0] else "reject")
+    if m[0]:
+        for i in m[1]:
+            print(" ".join(i))

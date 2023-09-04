@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+
+import sys
+import re_groups
+import regexp
+import nfa
+
+# general usage function for error handling
+def usage(code=0):
+    print('Usage:')
+    print('./msed -f command_file [file ...]')
+    print('./msed -e command [-e command ...] [file ...]')
+    sys.exit(code)
+
+# parses a list of program commands to account for branching from loops
+def parse_program(program):
+    p = []
+    loops = set()
+    for i, command in enumerate(program):
+        cmd = ()
+
+        # for generic sed replacements
+        if command[0] == 's':
+            cmd = (command, i + 1)
+
+        # for branch names and their indices
+        elif command[0] == ':':
+            cmd = (command, i + 1)
+            loops.add((command[1:], i))
+        
+        # set branch to -2 to add loops later (specifically loops that jump somewhere after their branch command)
+        else:
+            cmd = (command, -2)
+        
+        # last command goes to index of -1 to determine termination
+        if i == len(program) - 1:
+            cmd = (cmd[0], -1)
+        p.append(cmd)
+    
+    # replace any loop branches with their appropriate indices
+    prog = []
+    for cmd, i in p:
+        if i == -2:
+            for loop, jump in loops:
+                if cmd.endswith(loop):
+                    prog.append((cmd, jump))
+        else:
+            prog.append((cmd, i))
+
+    return prog
+
+# run the sed program on each string in the list from the file or stdin
+def run_sed(program, strings):
+    p = parse_program(program)
+    # print(p)
+    for string in strings:
+        run_program(p, string)
+
+# runs a parsed sed program on a given string
+def run_program(program, string):
+    index = 0
+
+    # run this while loop until the last command is reached
+    while index != -1:
+        cmd, nxt = program[index]
+
+        # for loop names, do nothing
+        if cmd[0] == ':':
+            pass
+
+        # for replacements, call helper function
+        elif cmd[0] == 's':
+            string = sed_replacement(cmd, string)
+
+        # for loop checks, check string against regex and branch back if it matches
+        else:
+            regex = cmd.split('/')[1]
+            tree = regexp.parse(regex)
+            m = regexp.to_nfa(tree)[0]
+            for l in string:
+                m.add_symbol(l)
+            flag, path = nfa.match(m, string)
+            if not flag:
+                nxt = -1 if index >= len(program) - 1 else index + 1
+        
+        # set next index and repeat
+        index = nxt
+
+    print(string)
+
+# helper function that does regex replacements
+def sed_replacement(command, string):
+    
+    # determine which regex to check against and what to replace it with
+    command = command.split('/')
+    re = command[1]
+    replace = [_ for _ in command[2]]
+    new = []
+
+    # parse the contents of the new regex which may contain back references to groups
+    while replace:
+        i = replace.pop(0)
+        if i == '\\':
+            i = replace.pop(0)
+            num = ''
+            if i == 'g':
+                replace.pop(0)
+            else:
+                num += i
+            while replace and replace[0].isdigit():
+                num += replace.pop(0)
+            if replace and replace[0] == '>':
+                replace.pop(0)
+            new.append(int(num))
+        else:
+            new.append(i)
+    
+    # check string against regex and determine groups
+    tree = regexp.parse(re)
+    m = regexp.to_nfa(tree)[0]
+    for l in string:
+        m.add_symbol(l)
+    flag, path = nfa.match(m, string)
+
+    # if the string doesn't match the regex, don't do anything
+    if not flag:
+        return string
+    
+    # otherwise rebuild string based on the new regex
+    groups = re_groups.locate_groups(path, re_groups.group_mapping(m))
+    new_string = ''
+    for i in new:
+        if type(i) == int:
+            if i in groups:
+                new_string += groups[i]
+        else:
+            new_string += i
+
+    return new_string
+    
+if __name__ == "__main__":
+    # parse arguments
+    commands = []
+    strings = []
+    args = sys.argv[1:]
+    while args:
+        match(args[0]):
+            case '-f':
+                with open(args[1], 'r') as file:
+                    commands += file.read().splitlines()
+                args = args[2:]
+            case '-e':
+                commands.append(args[1])
+                args = args[2:]
+            case '-h':
+                usage(1)
+
+            # read strings from file
+            case default:
+                try:
+                    with open(args[0], 'r') as file:
+                        strings += file.read().splitlines()
+                except:
+                    print('Please provide a valid file name or none at all')
+                    usage(1)
+
+    # read strings from stdin if no file provided
+    if not strings:
+        for i in sys.stdin:
+            strings.append(i.strip())
+
+    # run the sed program
+    run_sed(commands, strings)

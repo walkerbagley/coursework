@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+
+import sys
+import tm
+
+# general usage function for error handling
+def usage(code=0):
+    print('Usage:')
+    print('./tm_to_sed tm_file')
+    sys.exit(code)
+
+# creates program from a turing machine t based on Sipser's configurations
+# each transition corresponds to a unique configuration, so the general idea of building this program is as follows:
+#   loop start
+#   sed replacement for each transition
+#   loop callback for each transition that does not go to accept
+#   branch for accept state since the string cannot take any transitions anymore
+#   branch for reject which should occur if accept is not taken
+#   reject start
+#   overwrite string with 'reject'
+#   accept start
+#   get rid of state info, and prefix string with 'accept:'
+def tm_to_sed(t):
+    # basic variables for sigma and sigma star
+    sigma = f'({"|".join(t.tape)})'
+    sigma_star = f'(({"|".join(t.tape)})*)'
+
+    # start of the program:
+    #   initializes string to have start state and blank space at the end
+    #   initializes our loop
+    #   adds a ^ to denote the start of the string and an extra blank space at the end of the string at the start of each loop iteration
+    program = [f's/{sigma_star}/[{t.start}]\\1_/', ':loop', f's/{sigma_star}([({"|".join([_ for _ in t.states if _ != t.accept])})]){sigma_star}/^\\1\\3\\5_/']
+
+    # need loop call backs for each configuration that is not the accept one, so keep track of them
+    loops = []
+    tr_accept = None
+    for q1 in t.transitions:
+        for r in t.transitions[q1]:
+            for tr in t.transitions[q1][r]:
+                # specify the accept transition for later
+                if tr.q2 == t.accept:
+                    tr_accept = tr
+                
+                # for turing transitions to the right
+                if tr.d == 'R':
+                    old_state = f'^{sigma_star}[{tr.q1}]{tr.r}{sigma_star}'
+                    new_state = f'\g<1>{tr.w}[{tr.q2}]\g<3>'
+                    if tr.q2 != t.accept:
+                        loops.append(f'/{sigma_star}{tr.w}[{tr.q2}]{sigma_star}/bloop')
+                
+                # for turing transitions to the left
+                else:
+                    old_state = f'^({sigma_star}{sigma}|)[{tr.q1}]{tr.r}{sigma_star}'
+                    new_state = f'\g<2>[{tr.q2}]\g<4>{tr.w}\g<5>'
+                    if tr.q2 != t.accept:
+                        loops.append(f'/{sigma_star}[{tr.q2}]({sigma}|){tr.w}{sigma_star}/bloop')
+                program.append(f's/{old_state}/{new_state}/')
+    program += loops
+    
+    # accept branch
+    program.append(f'/{sigma_star}{tr_accept.r}[{tr_accept.q2}]{sigma_star}/baccept')
+
+    # reject branch
+    program.append(f'/{sigma_star}/breject')
+
+    # reject loop
+    program.append(':reject')
+    program.append(f's/^{sigma_star}[({"|".join([_ for _ in t.states if _ != t.accept])})]{sigma_star}/reject/')
+
+    # accept loop
+    program.append(':accept')
+    program.append(f's/{sigma_star}[{tr_accept.q2}]{sigma_star}/accept:\\1\\3/')
+    
+    return program
+
+if __name__ == "__main__":
+    # argument parsing
+    if len(sys.argv) != 2:
+        print('Please provide one file name')
+        usage(1)
+    
+    # open turing machine from file
+    t = None
+    try:
+        with open(sys.argv[1], 'r') as file:
+            t = tm.read(file)
+    except:
+        print('Invalid file')
+        usage(1)
+    
+    # print out compiled program line by line
+    program = tm_to_sed(t)
+    for line in program:
+        print(line)

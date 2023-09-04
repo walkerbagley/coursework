@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+# Walker Bagley and Patrick Schlosser
+# CSE 30151: Theory of Computing CP2
+# 10 March 2023
+
+import sys
+from nfa_funcs import print_nfa
+from parse_re import parse_re
+from string_nfa import string_nfa
+
+def re_to_nfa(re=''):
+    tree = parse_re(re)
+    tree = tree.replace('symbol ', 'symbol').replace('))', ') )').replace(')(', ') (')
+    tree = tree.split(' ')
+    print(tree)
+    return nfa_builder(tree)
+
+def nfa_builder(re=[]):
+    if not re:
+        return
+    elif 'epsilon' in re[0]:
+        return string_nfa('')
+    elif 'symbol' in re[0]:
+        return string_nfa(re[0].split('\"')[1])
+    elif 'union' in re[0] or 'star' in re[0] or 'concat' in re[0]:
+        print
+    return re[0]
+
+if __name__=='__main__':
+    re = sys.argv[1:]
+    if len(re) != 1:
+        sys.exit("Please provide a regular expression")
+    re = re[0]
+    n = re_to_nfa(re)
+    print_nfa(n)
+    
