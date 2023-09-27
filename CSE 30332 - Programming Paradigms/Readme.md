@@ -9,7 +9,8 @@
     7. d7
     8. ttt - TicTacToe game tree application to find the best possible move
 3. hidden_paradigms
-    1. 
+    1. d8 - Regular expression parser/matcher in Python with text file input
+    2. d9 - Assembly program to display typed letters in the terminal
 5. java
     1. d10 - Sphere class as demonstration of OOP
     2. d11 - Game intro, player that moves down
