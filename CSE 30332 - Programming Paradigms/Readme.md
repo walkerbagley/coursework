@@ -11,4 +11,6 @@
 3. hidden_paradigms
     1. 
 5. java
-    1. 
+    1. d10 - Sphere class as demonstration of OOP
+    2. d11 - Game intro, player that moves down
+    3. d12 - Add collider to game to remove the player on enemy touch, movement in all 4 directions
