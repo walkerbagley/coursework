@@ -1,4 +1,4 @@
-**CSE 20311 - Fundamentals of Computing:**
+## CSE 20311 - Fundamentals of Computing:
 1. Lab 1: Hello World, Football Score Calculator, Law of Cosines
 2. Lab 2: Graph a Function, Quadratic Roots Calculator, Mortgage Calculator, Sum of Squares/Roots, Printing a Table
 3. Lab 3: 4 Function Calculator, Polar Coordinates Converter
