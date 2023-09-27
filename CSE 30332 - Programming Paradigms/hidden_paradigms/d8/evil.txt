@@ -1,0 +1,10 @@
+add str acat
+add open
+add evil cat
+add str c
+add evil cat
+add str d
+add evil #
+add close
+match acatcatccatcatdcatccatcatdcatccatcatd
+match acatcatccatcatdcatccatcatd

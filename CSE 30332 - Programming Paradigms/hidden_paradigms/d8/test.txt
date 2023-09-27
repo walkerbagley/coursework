@@ -1,0 +1,7 @@
+add plus cat
+add dot
+add str d
+add str o
+add star g
+match catcatQdogggggg
+match turkeybaconcheese
