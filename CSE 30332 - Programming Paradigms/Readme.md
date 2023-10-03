@@ -15,3 +15,5 @@
     1. d10 - Sphere class as demonstration of OOP
     2. d11 - Game intro, player that moves down
     3. d12 - Add collider to game to remove the player on enemy touch, movement in all 4 directions
+    4. d13 - Begin creating game engine used for d11 and d12 including a screen, engine and game using java.awt
+    5. d14 - Add functionality to game engine from d13, including world objects and a game clock
